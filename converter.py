@@ -26,7 +26,6 @@ parser.add_argument(
 args = parser.parse_args()
 original_path = os.path.join(os.getcwd(), args.path)
 
-lock = Manager().Lock()
 
 def count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list, lock) -> int:
     path = os.path.join(original_path, file)
@@ -60,10 +59,9 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
             count += 1
             
         logging.info(f"Adding {file} to DataFrame list")
-        lock.aquire()
-        logging.info(f"Lock acquired to file {file}")
-        dataframe_list.append([file, count])
-        lock.release()
+        with lock:
+            logging.info(f"Lock acquired to file {file}")
+            dataframe_list.append([file, count])
         logging.info(f"Lock released and added {file} to DataFrame list")
         cap.release()
         logging.info(f"Capture to Path {path} released")
@@ -90,7 +88,7 @@ if __name__ == "__main__":
 
     try:
         with Manager() as manager:
-            lock = Lock()
+            lock = manager.Lock()
             dataframe_list = manager.list()
 
             logging.info(f"File List: {file_list}")
