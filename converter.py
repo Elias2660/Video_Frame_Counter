@@ -62,6 +62,9 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
         dataframe_list.append([file, count])
         cap.release()
         logging.info(f"Capture to Path {path} released")
+        if new_path:
+            out.release()
+            logging.info(f"Capture to Path {new_path} released")
     except Exception as e:
         logging.error(f"Error in counting frames for {file} with error {e}")
         cap.release()
