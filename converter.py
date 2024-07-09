@@ -6,7 +6,7 @@ import cv2
 import concurrent.futures
 import re
 import subprocess
-from multiprocessing import Manager, freeze_support
+from multiprocessing import Manager, freeze_support, Lock
 
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
@@ -26,8 +26,9 @@ parser.add_argument(
 args = parser.parse_args()
 original_path = os.path.join(os.getcwd(), args.path)
 
+lock = Manager().Lock()
 
-def count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list) -> int:
+def count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list, lock) -> int:
     path = os.path.join(original_path, file)
     logging.info(f"Capture to Path {file} about to be established")
     cap = cv2.VideoCapture(path)
@@ -59,7 +60,11 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
             count += 1
             
         logging.info(f"Adding {file} to DataFrame list")
+        lock.aquire()
+        logging.info(f"Lock acquired to file {file}")
         dataframe_list.append([file, count])
+        lock.release()
+        logging.info(f"Lock released and added {file} to DataFrame list")
         cap.release()
         logging.info(f"Capture to Path {path} released")
         if new_path:
@@ -85,6 +90,7 @@ if __name__ == "__main__":
 
     try:
         with Manager() as manager:
+            lock = Lock()
             dataframe_list = manager.list()
 
             logging.info(f"File List: {file_list}")
@@ -94,7 +100,7 @@ if __name__ == "__main__":
             ) as executor:
                 logging.debug(f"Executor established")
                 futures = [
-                    executor.submit(count_frames_and_write_new_file, original_path, file, dataframe_list)
+                    executor.submit(count_frames_and_write_new_file, original_path, file, dataframe_list, lock)
                     for file in file_list
                 ]
                 concurrent.futures.wait(futures)
