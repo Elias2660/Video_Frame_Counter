@@ -51,25 +51,31 @@ def count_frames(original_path: str, file:str) -> int:
         logging.error(f"Error in counting frames for {file} with error {e}")
         cap.release()
     
-
-command = "ls | grep -E '.h264|.mp4'"
-ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
-result = subprocess.run(command, shell=True, capture_output=True, text=True)
-file_list = sorted([ansi_escape.sub('', line) for line in result.stdout.splitlines()])
-logging.debug(f"File List: {file_list}")
-
-threads = list()
-logging.info(f"File List: {file_list}")
-
-with concurrent.futures.ThreadPoolExecutor(max_workers=args.max_workers) as executor:
-    logging.debug(f"Executor established")
-    executor.map(count_frames, [original_path]*len(file_list), file_list)
+try: 
+    command = "ls | grep -E '.h264|.mp4'"
+    ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    file_list = sorted([ansi_escape.sub('', line) for line in result.stdout.splitlines()])
+    logging.debug(f"File List: {file_list}")
+except Exception as e:
+    logging.error(f"Error in getting file list with error {e}")
     
-logging.debug(f"DataFrame about to be sorted")
-dataframe = dataframe.sort_values(by="filename")
-logging.debug(f"DataFrame about to be saved")
-dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
+try:
+    threads = list()
+    logging.info(f"File List: {file_list}")
 
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.max_workers) as executor:
+        logging.debug(f"Executor established")
+        executor.map(count_frames, [original_path]*len(file_list), file_list)
+        logging.debug(f"Executor mapped")
+except Exception as e:
+    logging.error(f"Error in creating threads with error {e}")        
 
-# %%
+try:
+    logging.debug(f"DataFrame about to be sorted")
+    dataframe = dataframe.sort_values(by="filename")
+    logging.debug(f"DataFrame about to be saved")
+    dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
+except Exception as e:
+    logging.error(f"Error in creating counts.csv with error {e}")
 
