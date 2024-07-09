@@ -1,5 +1,5 @@
-#%%
-import pandas as pd 
+# %%
+import pandas as pd
 import numpy as np
 import os
 import logging
@@ -16,8 +16,15 @@ logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
 
 parser = argparse.ArgumentParser(description="Create counts.csv file")
 
-parser.add_argument("--path", type=str, help="Path to the directory containing the video files", required=True)
-parser.add_argument("--max-workers", type=int, help="Number of threads to use", default=20)
+parser.add_argument(
+    "--path",
+    type=str,
+    help="Path to the directory containing the video files",
+    required=True,
+)
+parser.add_argument(
+    "--max-workers", type=int, help="Number of threads to use", default=20
+)
 args = parser.parse_args()
 original_path = os.path.join(os.getcwd(), args.path)
 
@@ -25,7 +32,7 @@ _lock = threading.Lock()
 dataframe = pd.DataFrame(columns=["filename", "framecount"])
 
 
-def count_frames(original_path: str, file:str) -> int:
+def count_frames(original_path: str, file: str) -> int:
     global _lock
     global dataframe
     path = os.path.join(original_path, file)
@@ -50,26 +57,31 @@ def count_frames(original_path: str, file:str) -> int:
     except Exception as e:
         logging.error(f"Error in counting frames for {file} with error {e}")
         cap.release()
-    
-try: 
+
+
+try:
     command = "ls | grep -E '.h264|.mp4'"
-    ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
+    ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    file_list = sorted([ansi_escape.sub('', line) for line in result.stdout.splitlines()])
+    file_list = sorted(
+        [ansi_escape.sub("", line) for line in result.stdout.splitlines()]
+    )
     logging.debug(f"File List: {file_list}")
 except Exception as e:
     logging.error(f"Error in getting file list with error {e}")
-    
+
 try:
     threads = list()
     logging.info(f"File List: {file_list}")
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=args.max_workers) as executor:
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=args.max_workers
+    ) as executor:
         logging.debug(f"Executor established")
-        executor.map(count_frames, [original_path]*len(file_list), file_list)
+        executor.map(count_frames, [original_path] * len(file_list), file_list)
         logging.debug(f"Executor mapped")
 except Exception as e:
-    logging.error(f"Error in creating threads with error {e}")        
+    logging.error(f"Error in creating threads with error {e}")
 
 try:
     logging.debug(f"DataFrame about to be sorted")
@@ -78,4 +90,3 @@ try:
     dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
 except Exception as e:
     logging.error(f"Error in creating counts.csv with error {e}")
-
