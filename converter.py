@@ -1,14 +1,12 @@
-# %%
 import pandas as pd
-import numpy as np
 import os
 import logging
-import threading
 import argparse
 import cv2
 import concurrent.futures
 import re
 import subprocess
+from multiprocessing import Manager, freeze_support
 
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
@@ -23,18 +21,13 @@ parser.add_argument(
     required=True,
 )
 parser.add_argument(
-    "--max-workers", type=int, help="Number of threads to use", default=20
+    "--max-workers", type=int, help="Number of processes to use", default=20
 )
 args = parser.parse_args()
 original_path = os.path.join(os.getcwd(), args.path)
 
-_lock = threading.Lock()
-dataframe = pd.DataFrame(columns=["filename", "framecount"])
 
-
-def count_frames(original_path: str, file: str) -> int:
-    global _lock
-    global dataframe
+def count_frames(original_path: str, file: str, dataframe_list: list) -> int:
     path = os.path.join(original_path, file)
     logging.info(f"Capture to Path {file} about to be established")
     cap = cv2.VideoCapture(path)
@@ -48,10 +41,8 @@ def count_frames(original_path: str, file: str) -> int:
             if not ret:
                 break
             count += 1
-        with _lock:
-            logging.info(f"Adding {file} to DataFrame")
-            new_row = pd.DataFrame([[file, count]], columns=["filename", "framecount"])
-            dataframe = pd.concat([dataframe, new_row], ignore_index=True)
+        logging.info(f"Adding {file} to DataFrame list")
+        dataframe_list.append([file, count])
         cap.release()
         logging.info(f"Capture to Path {path} released")
     except Exception as e:
@@ -59,34 +50,42 @@ def count_frames(original_path: str, file: str) -> int:
         cap.release()
 
 
-try:
-    command = "ls | grep -E '.h264|.mp4'"
-    ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    file_list = sorted(
-        [ansi_escape.sub("", line) for line in result.stdout.splitlines()]
-    )
-    logging.debug(f"File List: {file_list}")
-except Exception as e:
-    logging.error(f"Error in getting file list with error {e}")
+if __name__ == "__main__":
+    freeze_support()
+    try:
+        command = "ls | grep -E '.h264|.mp4'"
+        ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        file_list = sorted(
+            [ansi_escape.sub("", line) for line in result.stdout.splitlines()]
+        )
+        logging.debug(f"File List: {file_list}")
+    except Exception as e:
+        logging.error(f"Error in getting file list with error {e}")
 
-try:
-    threads = list()
-    logging.info(f"File List: {file_list}")
+    try:
+        with Manager() as manager:
+            dataframe_list = manager.list()
 
-    with concurrent.futures.ThreadPoolExecutor(
-        max_workers=args.max_workers
-    ) as executor:
-        logging.debug(f"Executor established")
-        executor.map(count_frames, [original_path] * len(file_list), file_list)
-        logging.debug(f"Executor mapped")
-except Exception as e:
-    logging.error(f"Error in creating threads with error {e}")
+            logging.info(f"File List: {file_list}")
 
-try:
-    logging.debug(f"DataFrame about to be sorted")
-    dataframe = dataframe.sort_values(by="filename")
-    logging.debug(f"DataFrame about to be saved")
-    dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
-except Exception as e:
-    logging.error(f"Error in creating counts.csv with error {e}")
+            with concurrent.futures.ProcessPoolExecutor(
+                max_workers=args.max_workers
+            ) as executor:
+                logging.debug(f"Executor established")
+                futures = [
+                    executor.submit(count_frames, original_path, file, dataframe_list)
+                    for file in file_list
+                ]
+                concurrent.futures.wait(futures)
+                logging.debug(f"Executor mapped")
+
+            dataframe = pd.DataFrame(
+                list(dataframe_list), columns=["filename", "framecount"]
+            )
+            logging.debug(f"DataFrame about to be sorted")
+            dataframe = dataframe.sort_values(by="filename")
+            logging.debug(f"DataFrame about to be saved")
+            dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
+    except Exception as e:
+        logging.error(f"Error in creating counts.csv with error {e}")
