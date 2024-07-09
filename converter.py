@@ -27,20 +27,37 @@ args = parser.parse_args()
 original_path = os.path.join(os.getcwd(), args.path)
 
 
-def count_frames(original_path: str, file: str, dataframe_list: list) -> int:
+def count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list) -> int:
     path = os.path.join(original_path, file)
     logging.info(f"Capture to Path {file} about to be established")
     cap = cv2.VideoCapture(path)
+    
+    new_path, frame_width, frame_height, fps = None, None, None, None
+    # also convert to .mp4
+    if (path.endswith(".h264")):
+        new_path = path.replace(".h264", ".mp4")
+        logging.info(f"Capture to Path {new_path} about to be established")
+        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        out = cv2.VideoWriter(new_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (frame_width, frame_height))
+    
+    
     try:
         logging.debug(f"Capture to Path {file} established")
         count = 0
         while cap.isOpened():
-            ret, _ = cap.read()
+            ret, frame = cap.read()
             if count % 1500 == 0:
                 logging.info(f"Frame {count} read from {file}")
             if not ret:
                 break
+            if new_path:
+                out.write(frame)
+                if count % 1500 == 0:
+                    logging.info(f"Frame {count} written to {new_path}")
             count += 1
+            
         logging.info(f"Adding {file} to DataFrame list")
         dataframe_list.append([file, count])
         cap.release()
@@ -74,7 +91,7 @@ if __name__ == "__main__":
             ) as executor:
                 logging.debug(f"Executor established")
                 futures = [
-                    executor.submit(count_frames, original_path, file, dataframe_list)
+                    executor.submit(count_frames_and_write_new_file, original_path, file, dataframe_list)
                     for file in file_list
                 ]
                 concurrent.futures.wait(futures)
