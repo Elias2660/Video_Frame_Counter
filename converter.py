@@ -55,7 +55,7 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
             if new_path:
                 out.write(frame)
                 if count % 1500 == 0:
-                    logging.info(f"Frame {count} written to {new_path}")
+                    logging.info(f"Frame {count} written to {file.replace('.h264', '.mp4')}")
             count += 1
             
         logging.info(f"Adding {file} to DataFrame list")
