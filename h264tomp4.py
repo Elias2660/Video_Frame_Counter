@@ -61,7 +61,7 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
         logging.info(f"Adding {file} to DataFrame list")
         with lock:
             logging.info(f"Lock acquired to file {file}")
-            dataframe_list.append([file, count])
+            dataframe_list.append([file.replace('.h264', '.mp4'), count])
         logging.info(f"Lock released and added {file} to DataFrame list")
         cap.release()
         logging.info(f"Capture to Path {path} released")
@@ -76,7 +76,7 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
 if __name__ == "__main__":
     freeze_support()
     try:
-        command = "ls | grep -E '.h264|.mp4'"
+        command = "ls | grep -E '.h264'"
         ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         file_list = sorted(
