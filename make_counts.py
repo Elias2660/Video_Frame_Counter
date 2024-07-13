@@ -58,7 +58,7 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
 if __name__ == "__main__":
     freeze_support()
     try:
-        command = "ls | grep -E '.mp4|.h264'"
+        command = "ls | grep -E '.mp4$|.h264$'"
         ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
         result = subprocess.run(command, shell=True, capture_output=True, text=True)
         file_list = sorted(
