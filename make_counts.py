@@ -46,7 +46,7 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
         logging.info(f"Adding {file} to DataFrame list")
         with lock:
             logging.info(f"Lock acquired to file {file}")
-            dataframe_list.append([file.replace('.mp4', '.h264'), count])
+            dataframe_list.append([file, count])
         logging.info(f"Lock released and added {file} to DataFrame list")
         cap.release()
         logging.info(f"Capture to Path {path} released")
