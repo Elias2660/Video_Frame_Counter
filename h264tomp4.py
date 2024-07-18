@@ -111,5 +111,10 @@ if __name__ == "__main__":
             dataframe = dataframe.sort_values(by="filename")
             logging.debug(f"DataFrame about to be saved")
             dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
+             
+            logging.info(f"Moving the files to new directory")
+            subprocess.run("rm -rf mp4_files", shell=True)
+            subprocess.run("mkdir -p mp4_files", shell=True)
+            subprocess.run("mv *.mp4 mp4_files/", shell=True)
     except Exception as e:
         logging.error(f"Error in creating counts.csv with error {e}")
