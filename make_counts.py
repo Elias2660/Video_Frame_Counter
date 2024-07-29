@@ -18,7 +18,7 @@ parser.add_argument(
     "--path",
     type=str,
     help="Path to the directory containing the video files",
-    required=True,
+    default=".",
 )
 parser.add_argument(
     "--max-workers", type=int, help="Number of processes to use", default=20
