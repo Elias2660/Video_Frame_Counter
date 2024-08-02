@@ -8,41 +8,26 @@ import re
 import subprocess
 from multiprocessing import Manager, freeze_support, Lock
 
-format = "%(asctime)s: %(message)s"
-logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
-# logging.getLogger().setLevel(logging.DEBUG)
 
-parser = argparse.ArgumentParser(description="Create counts.csv file")
-
-parser.add_argument(
-    "--path",
-    type=str,
-    help="Path to the directory containing the video files",
-    default=".",
-)
-parser.add_argument(
-    "--max-workers", type=int, help="Number of processes to use", default=20
-)
-args = parser.parse_args()
-original_path = os.path.join(os.getcwd(), args.path)
-
-
-def count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list, lock) -> int:
+def count_frames_and_write_new_file(
+    original_path: str, file: str, dataframe_list: list, lock
+) -> int:
     path = os.path.join(original_path, file)
     logging.info(f"Capture to Path {file} about to be established")
     cap = cv2.VideoCapture(path)
-    
+
     new_path, frame_width, frame_height, fps = None, None, None, None
     # also convert to .mp4
-    if (path.endswith(".h264")):
+    if path.endswith(".h264"):
         new_path = path.replace(".h264", ".mp4")
         logging.info(f"Capture to Path {new_path} about to be established")
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
-        out = cv2.VideoWriter(new_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (frame_width, frame_height))
-    
-    
+        out = cv2.VideoWriter(
+            new_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (frame_width, frame_height)
+        )
+
     try:
         logging.debug(f"Capture to Path {file} established")
         count = 0
@@ -55,13 +40,15 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
             if new_path:
                 out.write(frame)
                 if count % 1500 == 0:
-                    logging.info(f"Frame {count} written to {file.replace('.h264', '.mp4')}")
+                    logging.info(
+                        f"Frame {count} written to {file.replace('.h264', '.mp4')}"
+                    )
             count += 1
-            
+
         logging.info(f"Adding {file} to DataFrame list")
         with lock:
             logging.info(f"Lock acquired to file {file}")
-            dataframe_list.append([file.replace('.h264', '.mp4'), count])
+            dataframe_list.append([file.replace(".h264", ".mp4"), count])
         logging.info(f"Lock released and added {file} to DataFrame list")
         cap.release()
         logging.info(f"Capture to Path {path} released")
@@ -74,6 +61,29 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
 
 
 if __name__ == "__main__":
+    format = "%(asctime)s: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
+
+    parser = argparse.ArgumentParser(description="Create counts.csv file")
+
+    parser.add_argument(
+        "--path",
+        type=str,
+        help="Path to the directory containing the video files",
+        default=".",
+    )
+    parser.add_argument(
+        "--max-workers", type=int, help="Number of processes to use", default=20
+    )
+    parser.add_argument(
+        "--debug", action="store_true", help="Enable debug logging", default=False
+    )
+    args = parser.parse_args()
+    original_path = os.path.join(os.getcwd(), args.path)
+
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+
     freeze_support()
     try:
         command = "ls | grep -E '.h264$'"
@@ -98,7 +108,13 @@ if __name__ == "__main__":
             ) as executor:
                 logging.debug(f"Executor established")
                 futures = [
-                    executor.submit(count_frames_and_write_new_file, original_path, file, dataframe_list, lock)
+                    executor.submit(
+                        count_frames_and_write_new_file,
+                        original_path,
+                        file,
+                        dataframe_list,
+                        lock,
+                    )
                     for file in file_list
                 ]
                 concurrent.futures.wait(futures)
@@ -111,11 +127,11 @@ if __name__ == "__main__":
             dataframe = dataframe.sort_values(by="filename")
             logging.debug(f"DataFrame about to be saved")
             dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
-             
+
             logging.info(f"Moving the files to new directory")
             subprocess.run("rm -rf h264_files", shell=True)
             subprocess.run("mkdir -p h264_files", shell=True)
             subprocess.run("mv *.h264 h264_files/", shell=True)
-                   
+
     except Exception as e:
         logging.error(f"Error in creating counts.csv with error {e}")

@@ -8,24 +8,6 @@ import re
 import subprocess
 from multiprocessing import Manager, freeze_support, Lock
 
-format = "%(asctime)s: %(message)s"
-logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
-# logging.getLogger().setLevel(logging.DEBUG)
-
-parser = argparse.ArgumentParser(description="Create counts.csv file")
-
-parser.add_argument(
-    "--path",
-    type=str,
-    help="Path to the directory containing the video files",
-    default=".",
-)
-parser.add_argument(
-    "--max-workers", type=int, help="Number of processes to use", default=20
-)
-args = parser.parse_args()
-original_path = os.path.join(os.getcwd(), args.path)
-
 
 def count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list, lock) -> int:
     path = os.path.join(original_path, file)
@@ -57,6 +39,35 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
 
 if __name__ == "__main__":
     freeze_support()
+    
+
+    parser = argparse.ArgumentParser(description="Create counts.csv file")
+
+    parser.add_argument(
+        "--path",
+        type=str,
+        help="Path to the directory containing the video files",
+        default=".",
+    )
+    parser.add_argument(
+        "--max-workers", type=int, help="Number of processes to use", default=20
+    )
+    parser.add_argument(
+        "--debug", action="store_true", help="Enable debug logging", default=False
+    )
+    args = parser.parse_args()
+    
+    format = "%(asctime)s: %(message)s"
+    logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
+    
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+        logging.debug(f"Debug logging enabled")
+    
+
+    
+    original_path = os.path.join(os.getcwd(), args.path)
+    
     try:
         command = "ls | grep -E '.mp4$|.h264$'"
         ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
