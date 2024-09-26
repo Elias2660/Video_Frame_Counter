@@ -19,7 +19,7 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
         count = 0
         while cap.isOpened():
             ret, _ = cap.read()
-            if count % 1500 == 0:
+            if count % 5000 == 0:
                 logging.info(f"Frame {count} read from {file}")
             if not ret:
                 break

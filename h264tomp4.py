@@ -33,13 +33,13 @@ def count_frames_and_write_new_file(
         count = 0
         while cap.isOpened():
             ret, frame = cap.read()
-            if count % 1500 == 0:
+            if count % 5000 == 0:
                 logging.info(f"Frame {count} read from {file}")
             if not ret:
                 break
             if new_path:
                 out.write(frame)
-                if count % 1500 == 0:
+                if count % 5000 == 0:
                     logging.info(
                         f"Frame {count} written to {file.replace('.h264', '.mp4')}"
                     )
