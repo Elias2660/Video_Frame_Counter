@@ -1,7 +1,7 @@
 appnope==0.1.4
 asttokens==2.4.1
 comm==0.2.2
-debugpy==1.8.5
+debugpy==1.8.6
 decorator==5.1.1
 executing==2.1.0
 ipykernel==6.29.5
@@ -19,7 +19,7 @@ parso==0.8.4
 pathlib==1.0.1
 pexpect==4.9.0
 platformdirs==4.3.6
-prompt_toolkit==3.0.47
+prompt_toolkit==3.0.48
 psutil==6.0.0
 ptyprocess==0.7.0
 pure-eval==0.2.3
