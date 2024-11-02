@@ -62,8 +62,11 @@ def count_frames_and_write_new_file(
 
 if __name__ == "__main__":
     format = "%(asctime)s: %(message)s"
-    logging.basicConfig(format=format, level=logging.INFO, datefmt="%H:%M:%S")
-
+    logging.basicConfig(
+        format="%(asctime)s: %(message)s",
+        level=logging.INFO,
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
     parser = argparse.ArgumentParser(description="Create counts.csv file")
 
     parser.add_argument(
