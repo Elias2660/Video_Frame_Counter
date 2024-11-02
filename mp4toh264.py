@@ -33,13 +33,13 @@ def count_frames_and_write_new_file(
         count = 0
         while cap.isOpened():
             ret, frame = cap.read()
-            if count % 10000 == 0:
+            if count % 10000 == 0 and count != 0:
                 logging.info(f"Frame {count} read from {file}")
             if not ret:
                 break
             if new_path:
                 out.write(frame)
-                if count % 10000 == 0:
+                if count % 10000 == 0 and count != 0:
                     logging.info(
                         f"Frame {count} written to {file.replace('.mp4', '.h264')}"
                     )
@@ -79,7 +79,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    format = "%(asctime)s: %(message)s"
     logging.basicConfig(
         format="%(asctime)s: %(message)s",
         level=logging.INFO,

@@ -19,7 +19,7 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
         count = 0
         while cap.isOpened():
             ret, _ = cap.read()
-            if count % 10000 == 0:
+            if count % 10000 == 0 and count != 0:
                 logging.info(f"Frame {count} read from {file}")
             if not ret:
                 break
@@ -56,8 +56,7 @@ if __name__ == "__main__":
         "--debug", action="store_true", help="Enable debug logging", default=False
     )
     args = parser.parse_args()
-    
-    format = "%(asctime)s: %(message)s"
+
     logging.basicConfig(
         format="%(asctime)s: %(message)s",
         level=logging.INFO,
