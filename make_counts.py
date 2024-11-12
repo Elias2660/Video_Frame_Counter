@@ -11,11 +11,11 @@ from multiprocessing import Manager, freeze_support, Lock
 
 def count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list, lock) -> int:
     path = os.path.join(original_path, file)
-    logging.info(f"Capture to Path {file} about to be established")
+    logging.info(f"Capture to video {file} about to be established")
     cap = cv2.VideoCapture(path)
     
     try:
-        logging.debug(f"Capture to Path {file} established")
+        logging.debug(f"Capture to video {file} established")
         count = 0
         while cap.isOpened():
             ret, _ = cap.read()
@@ -31,7 +31,7 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
             dataframe_list.append([file, count])
         logging.info(f"Lock released and added {file} to DataFrame list")
         cap.release()
-        logging.info(f"Capture to Path {path} released")
+        logging.info(f"Capture to video {file} released")
     except Exception as e:
         logging.error(f"Error in counting frames for {file} with error {e}")
         cap.release()

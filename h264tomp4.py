@@ -13,14 +13,14 @@ def count_frames_and_write_new_file(
     original_path: str, file: str, dataframe_list: list, lock
 ) -> int:
     path = os.path.join(original_path, file)
-    logging.info(f"Capture to Path {file} about to be established")
+    logging.info(f"Capture to video {file} about to be established")
     cap = cv2.VideoCapture(path)
 
     new_path, frame_width, frame_height, fps = None, None, None, None
     # also convert to .mp4
     if path.endswith(".h264"):
         new_path = path.replace(".h264", ".mp4")
-        logging.info(f"Capture to Path {new_path} about to be established")
+        logging.info(f"Capture to video {new_path} about to be established")
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
@@ -29,7 +29,7 @@ def count_frames_and_write_new_file(
         )
 
     try:
-        logging.debug(f"Capture to Path {file} established")
+        logging.debug(f"Capture to video {file} established")
         count = 0
         while cap.isOpened():
             ret, frame = cap.read()
@@ -51,10 +51,10 @@ def count_frames_and_write_new_file(
             dataframe_list.append([file.replace(".h264", ".mp4"), count])
         logging.info(f"Lock released and added {file} to DataFrame list")
         cap.release()
-        logging.info(f"Capture to Path {path} released")
+        logging.info(f"Capture to video {file} released")
         if new_path:
             out.release()
-            logging.info(f"Capture to Path {new_path} released")
+            logging.info(f"Capture to video {file} released")
     except Exception as e:
         logging.error(f"Error in counting frames for {file} with error {e}")
         cap.release()
