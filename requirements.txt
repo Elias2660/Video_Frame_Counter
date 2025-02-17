@@ -11,7 +11,7 @@ jupyter_client==8.6.3
 jupyter_core==5.7.2
 matplotlib-inline==0.1.7
 nest-asyncio==1.6.0
-numpy==2.2.2
+numpy==2.2.3
 opencv-python==4.11.0.86
 packaging==24.2
 pandas==2.2.3
@@ -20,7 +20,7 @@ pathlib==1.0.1
 pexpect==4.9.0
 platformdirs==4.3.6
 prompt_toolkit==3.0.50
-psutil==6.1.1
+psutil==7.0.0
 ptyprocess==0.7.0
 pure-eval==0.2.3
 Pygments==2.19.1
