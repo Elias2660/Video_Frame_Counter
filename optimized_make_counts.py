@@ -52,7 +52,6 @@ if __name__ == "__main__":
 
         for file in file_list:
             path = os.path.join(original_path, file)
-            logging.info(f"Capture about to {file} about to be established")
             cap = cv2.VideoCapture(path)
             count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             dataframe_list.append([file, count])
