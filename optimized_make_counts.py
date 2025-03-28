@@ -1,3 +1,44 @@
+"""
+Script for counting video frames in media files and generating a CSV report.
+
+This script searches for video files with extensions .mp4 and .h264 in the specified
+directory, counts the total number of frames for each video using OpenCV, and writes 
+the results into a CSV file named "counts.csv". Logging is provided for both normal 
+and debug modes to help trace execution flow and potential issues. 
+
+Usage:
+    python optimized_make_counts.py [--path PATH] [--max-workers MAX_WORKERS] [--debug]
+
+Arguments:
+    --path:
+        Type: str
+        Description: Path to the directory containing the video files.
+        Default: "." (current working directory)
+
+    ! no use, just for compatibility for the master_run.py
+    --max-workers: 
+        Type: int
+        Description: Number of processes to use (reserved for potential parallelizations).
+        Default: 20 
+
+    --debug:
+        Action: store_true
+        Description: Enable debug logging to provide detailed output.
+        Default: False
+
+Workflow:
+    1. Parse command-line parameters.
+    2. Configure logging based on debug flag.
+    3. Construct the full path to the directory with video files.
+    4. Execute a shell command to list files filtered for .mp4 and .h264 formats.
+    5. Iterate through each file:
+         - Open the video using OpenCV.
+         - Retrieve the total frame count.
+         - Append the filename and frame count to a data collection list.
+    6. Create a pandas DataFrame from the collected data.
+    7. Sort the DataFrame by filename and save it as "counts.csv" in the same directory.
+"""
+
 import pandas as pd
 import os
 import logging
@@ -51,6 +92,7 @@ if __name__ == "__main__":
         logging.info(f"File List: {file_list}")
 
         for file in file_list:
+            # use .mp4 indexing function to find the frames without actually counting them
             path = os.path.join(original_path, file)
             cap = cv2.VideoCapture(path)
             count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
