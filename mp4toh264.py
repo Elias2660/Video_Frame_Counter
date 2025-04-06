@@ -1,12 +1,13 @@
-import pandas as pd
-import os
-import logging
 import argparse
-import cv2
 import concurrent.futures
+import logging
+import os
 import re
 import subprocess
-from multiprocessing import Manager, freeze_support, Lock
+from multiprocessing import Lock, Manager, freeze_support
+
+import cv2
+import pandas as pd
 
 
 def count_frames_and_write_new_file(

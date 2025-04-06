@@ -39,13 +39,14 @@ Workflow:
     7. Sort the DataFrame by filename and save it as "counts.csv" in the same directory.
 """
 
-import pandas as pd
-import os
-import logging
 import argparse
-import cv2
+import logging
+import os
 import re
 import subprocess
+
+import cv2
+import pandas as pd
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create counts.csv file")
