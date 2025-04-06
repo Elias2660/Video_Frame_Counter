@@ -1,5 +1,5 @@
 """
-Script for counting video frames in media files and generating a CSV report.
+Script for counting video frames in media files and generating a CSV report. 
 
 This script searches for video files with extensions .mp4 and .h264 in the specified
 directory, counts the total number of frames for each video using OpenCV, and writes 

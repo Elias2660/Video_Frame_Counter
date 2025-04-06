@@ -1,5 +1,5 @@
 # Video Frame Counter
-
+ 
 This project includes a Python script (`converter.py`) for counting the frames in video files (`.h264` and `.mp4` formats) within a specified directory and outputs the counts to a CSV file (`counts.csv`).
 
 This project is most used with the [Unified-bee-Runner](https://github.com/Elias2660/Unified-bee-Runner).

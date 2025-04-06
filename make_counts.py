@@ -56,7 +56,7 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
     
     try:
         logging.debug(f"Capture to video {file} established")
-        count = 0
+        count = 0 
         while cap.isOpened():
             ret, _ = cap.read()
             if count % 10000 == 0 and count != 0:

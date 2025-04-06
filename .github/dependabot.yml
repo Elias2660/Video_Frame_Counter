@@ -4,7 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    assignees:
+    assignees: 
       - "Elias2660" # Assigns the pull request to your GitHub username
     labels:
       - "dependencies" # Adds a "dependencies" label to the pull requests
