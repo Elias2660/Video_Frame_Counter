@@ -12,8 +12,9 @@ import cv2
 import pandas as pd
 
 
-def count_frames_and_write_new_file(original_path: str, file: str,
-                                    dataframe_list: list, lock) -> int:
+def count_frames_and_write_new_file(
+    original_path: str, file: str, dataframe_list: list, lock
+) -> int:
     """
 
     :param original_path: str:
@@ -37,8 +38,9 @@ def count_frames_and_write_new_file(original_path: str, file: str,
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
-        out = cv2.VideoWriter(new_path, cv2.VideoWriter_fourcc(*"H264"), fps,
-                              (frame_width, frame_height))
+        out = cv2.VideoWriter(
+            new_path, cv2.VideoWriter_fourcc(*"H264"), fps, (frame_width, frame_height)
+        )
 
     try:
         logging.debug(f"Capture to video {file} established")
@@ -82,14 +84,12 @@ if __name__ == "__main__":
         help="Path to the directory containing the video files",
         default=".",
     )
-    parser.add_argument("--max-workers",
-                        type=int,
-                        help="Number of processes to use",
-                        default=20)
-    parser.add_argument("--debug",
-                        action="store_true",
-                        help="Enable debug logging",
-                        default=False)
+    parser.add_argument(
+        "--max-workers", type=int, help="Number of processes to use", default=20
+    )
+    parser.add_argument(
+        "--debug", action="store_true", help="Enable debug logging", default=False
+    )
 
     args = parser.parse_args()
 
@@ -107,12 +107,10 @@ if __name__ == "__main__":
     try:
         command = "ls | grep -E '.mp4$'"
         ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-        result = subprocess.run(command,
-                                shell=True,
-                                capture_output=True,
-                                text=True)
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
         file_list = sorted(
-            [ansi_escape.sub("", line) for line in result.stdout.splitlines()])
+            [ansi_escape.sub("", line) for line in result.stdout.splitlines()]
+        )
         logging.debug(f"File List: {file_list}")
     except Exception as e:
         logging.error(f"Error in getting file list with error {e}")
@@ -125,7 +123,8 @@ if __name__ == "__main__":
             logging.info(f"File List: {file_list}")
 
             with concurrent.futures.ProcessPoolExecutor(
-                    max_workers=args.max_workers) as executor:
+                max_workers=args.max_workers
+            ) as executor:
                 logging.debug(f"Executor established")
                 futures = [
                     executor.submit(
@@ -134,18 +133,19 @@ if __name__ == "__main__":
                         file,
                         dataframe_list,
                         lock,
-                    ) for file in file_list
+                    )
+                    for file in file_list
                 ]
                 concurrent.futures.wait(futures)
                 logging.debug(f"Executor mapped")
 
-            dataframe = pd.DataFrame(list(dataframe_list),
-                                     columns=["filename", "framecount"])
+            dataframe = pd.DataFrame(
+                list(dataframe_list), columns=["filename", "framecount"]
+            )
             logging.debug(f"DataFrame about to be sorted")
             dataframe = dataframe.sort_values(by="filename")
             logging.debug(f"DataFrame about to be saved")
-            dataframe.to_csv(os.path.join(original_path, "counts.csv"),
-                             index=False)
+            dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
 
             logging.info(f"Moving the files to new directory")
             subprocess.run("rm -rf mp4_files", shell=True)
