@@ -1,24 +1,24 @@
 """
 Module: h264tomp4.py
- 
-This module processes video files in the .h264 format, converting them to .mp4 while counting the number 
-of frames in each video. The processed data (new filename and frame count) is stored in a CSV file. Additionally, 
+
+This module processes video files in the .h264 format, converting them to .mp4 while counting the number
+of frames in each video. The processed data (new filename and frame count) is stored in a CSV file. Additionally,
 the module moves the original .h264 files to a specified directory after processing.
 
-The module leverages OpenCV for video capture and writing, concurrent.futures for parallel processing, and 
-multiprocessing for sharing data safely between processes. It also provides command-line arguments to specify 
+The module leverages OpenCV for video capture and writing, concurrent.futures for parallel processing, and
+multiprocessing for sharing data safely between processes. It also provides command-line arguments to specify
 the path to video files, the number of parallel workers, and the logging level.
 
 Functions:
     count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list, lock) -> int:
-        Processes a video file by reading its frames, converting it to .mp4 if needed, counting the frames, 
+        Processes a video file by reading its frames, converting it to .mp4 if needed, counting the frames,
         and appending the results to a shared list. Logging statements provide feedback during processing.
-        
+
 Usage:
     To run the module:
         python h264tomp4.py --path [directory_path] --max-workers [num_workers] [--debug]
 
-Processes a given video file by reading its frames, optionally converting it from .h264 to .mp4, 
+Processes a given video file by reading its frames, optionally converting it from .h264 to .mp4,
 counting the number of frames, and appending the processed filename and frame count to a shared list.
 
     Parameters:
@@ -28,7 +28,7 @@ counting the number of frames, and appending the processed filename and frame co
         lock (Lock): A multiprocessing lock to ensure thread-safe updates to the shared dataframe_list.
 
     Returns:
-        int: The total number of frames read from the video file. 
+        int: The total number of frames read from the video file.
              (Note: The function may not explicitly return a value in case of an exception.)
 
     Notes:
@@ -37,7 +37,7 @@ counting the number of frames, and appending the processed filename and frame co
         - OpenCV's VideoCapture is used to read frames, and VideoWriter is used to write frames to the new file.
         - The function periodically logs progress (every 10,000 frames) for both reading and writing.
         - After processing, the original capture and video writer objects are properly released.
-        - Any exceptions encountered during processing are logged, and the function safely releases 
+        - Any exceptions encountered during processing are logged, and the function safely releases
           any allocated resources.
     """
 import argparse
@@ -59,10 +59,10 @@ def count_frames_and_write_new_file(
 ) -> int:
     """
 
-    :param original_path: str: 
-    :param file: str: 
-    :param dataframe_list: list: 
-    :param lock: 
+    :param original_path: str:
+    :param file: str:
+    :param dataframe_list: list:
+    :param lock:
 
     """
     path = os.path.join(original_path, file)

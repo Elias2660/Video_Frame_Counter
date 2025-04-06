@@ -1,7 +1,7 @@
 """
 Module: make_counts.py
 Description:
-    This module processes video files in a specified directory by counting their frames. 
+    This module processes video files in a specified directory by counting their frames.
     The frame counts, along with the corresponding filenames, are saved in a CSV file ('counts.csv').
     Video processing is handled by OpenCV, and the module leverages parallel processing through
     the concurrent.futures.ProcessPoolExecutor along with multiprocessing.Manager to safely share data
@@ -56,10 +56,10 @@ def count_frames_and_write_new_file(
 ) -> int:
     """
 
-    :param original_path: str: 
-    :param file: str: 
-    :param dataframe_list: list: 
-    :param lock: 
+    :param original_path: str:
+    :param file: str:
+    :param dataframe_list: list:
+    :param lock:
 
     """
     path = os.path.join(original_path, file)

@@ -1,10 +1,10 @@
 """
-Script for counting video frames in media files and generating a CSV report. 
+Script for counting video frames in media files and generating a CSV report.
 
 This script searches for video files with extensions .mp4 and .h264 in the specified
-directory, counts the total number of frames for each video using OpenCV, and writes 
-the results into a CSV file named "counts.csv". Logging is provided for both normal 
-and debug modes to help trace execution flow and potential issues. 
+directory, counts the total number of frames for each video using OpenCV, and writes
+the results into a CSV file named "counts.csv". Logging is provided for both normal
+and debug modes to help trace execution flow and potential issues.
 
 Usage:
     python optimized_make_counts.py [--path PATH] [--max-workers MAX_WORKERS] [--debug]
@@ -16,10 +16,10 @@ Arguments:
         Default: "." (current working directory)
 
     ! no use, just for compatibility for the master_run.py
-    --max-workers: 
+    --max-workers:
         Type: int
         Description: Number of processes to use (reserved for potential parallelizations).
-        Default: 20 
+        Default: 20
 
     --debug:
         Action: store_true
