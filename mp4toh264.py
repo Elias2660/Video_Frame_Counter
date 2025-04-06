@@ -20,10 +20,10 @@ def count_frames_and_write_new_file(
     :param original_path: str:
     :param file: str:
     :param dataframe_list: list:
-    :param lock: 
-    :param original_path: str: 
-    :param file: str: 
-    :param dataframe_list: list: 
+    :param lock:
+    :param original_path: str:
+    :param file: str:
+    :param dataframe_list: list:
 
     """
     path = os.path.join(original_path, file)
