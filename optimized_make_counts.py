@@ -38,7 +38,6 @@ Workflow:
     6. Create a pandas DataFrame from the collected data.
     7. Sort the DataFrame by filename and save it as "counts.csv" in the same directory.
 """
-
 import argparse
 import logging
 import os
