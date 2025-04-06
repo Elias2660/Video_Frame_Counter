@@ -61,7 +61,9 @@ def count_frames_and_write_new_file(original_path: str, file: str,
     :param original_path: str:
     :param file: str:
     :param dataframe_list: list:
-    :param lock:
+    :param lock: param original_path: str:
+    :param file: str:
+    :param dataframe_list: list:
     :param original_path: str:
     :param file: str:
     :param dataframe_list: list:
