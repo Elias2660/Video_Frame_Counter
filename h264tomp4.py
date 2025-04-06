@@ -47,9 +47,7 @@ import logging
 import os
 import re
 import subprocess
-from multiprocessing import freeze_support
-from multiprocessing import Lock
-from multiprocessing import Manager
+from multiprocessing import Lock, Manager, freeze_support
 
 import cv2
 import pandas as pd
