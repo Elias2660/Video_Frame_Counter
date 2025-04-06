@@ -16,26 +16,28 @@ To set up the project environment:
    python3 -m venv venv
    ```
 
-4. Activate Virtual Environment 
-    - on Windows
+4. Activate Virtual Environment
 
-    ```powershell
-    .\venv\Scripts\activate
-    ```
+   - on Windows
 
-    - on Unix of MacOS
+   ```powershell
+   .\venv\Scripts\activate
+   ```
 
-    ```sh
-    source venv/bin/activate
-    ```
+   - on Unix of MacOS
 
-5. Install required dependencies: 
+   ```sh
+   source venv/bin/activate
+   ```
+
+5. Install required dependencies:
 
 ```sh
 pip install -r requirements.txt
 ```
 
 ## Usage
+
 To count the frames in video files:
 
 ```sh
@@ -68,6 +70,7 @@ This will generate a counts.csv file in the specified directory containing the f
 [Contributions](Contributing.md) are welcome! Please fork the repository and submit a pull request with your changes.
 
 ## License
+
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 Remember to replace `<path_to_video_files>` with the actual path to the directory containing your video files. Also, if you have a license file, replace "MIT License" with the correct license for your project.
