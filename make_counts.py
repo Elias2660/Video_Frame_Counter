@@ -53,10 +53,10 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
     path = os.path.join(original_path, file)
     logging.info(f"Capture to video {file} about to be established")
     cap = cv2.VideoCapture(path)
-    
+
     try:
         logging.debug(f"Capture to video {file} established")
-        count = 0 
+        count = 0
         while cap.isOpened():
             ret, _ = cap.read()
             if count % 10000 == 0 and count != 0:
@@ -64,7 +64,7 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
             if not ret:
                 break
             count += 1
-            
+
         logging.info(f"Adding {file} to DataFrame list")
         with lock:
             logging.info(f"Lock acquired to file {file}")
@@ -79,7 +79,6 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
 
 if __name__ == "__main__":
     freeze_support()
-    
 
     parser = argparse.ArgumentParser(description="Create counts.csv file")
 
@@ -101,19 +100,18 @@ if __name__ == "__main__":
         format="%(asctime)s: %(message)s",
         level=logging.INFO,
         datefmt="%Y-%m-%d %H:%M:%S",
-    )    
+    )
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
         logging.debug(f"Debug logging enabled")
-    
 
-    
     original_path = os.path.join(os.getcwd(), args.path)
-    
+
     try:
         command = "ls | grep -E '.mp4$|.h264$'"
         ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True,
+                                capture_output=True, text=True)
         file_list = sorted(
             [ansi_escape.sub("", line) for line in result.stdout.splitlines()]
         )
@@ -135,7 +133,8 @@ if __name__ == "__main__":
             ) as executor:
                 logging.debug(f"Executor established")
                 futures = [
-                    executor.submit(count_frames_and_write_new_file, original_path, file, dataframe_list, lock)
+                    executor.submit(count_frames_and_write_new_file,
+                                    original_path, file, dataframe_list, lock)
                     for file in file_list
                 ]
                 concurrent.futures.wait(futures)
@@ -147,6 +146,7 @@ if __name__ == "__main__":
             logging.debug(f"DataFrame about to be sorted")
             dataframe = dataframe.sort_values(by="filename")
             logging.debug(f"DataFrame about to be saved")
-            dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
+            dataframe.to_csv(os.path.join(
+                original_path, "counts.csv"), index=False)
     except Exception as e:
         logging.error(f"Error in creating counts.csv with error {e}")

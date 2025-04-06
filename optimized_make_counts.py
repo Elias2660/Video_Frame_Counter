@@ -78,7 +78,8 @@ if __name__ == "__main__":
     try:
         command = "ls | grep -E '.mp4$|.h264$'"
         ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        result = subprocess.run(command, shell=True,
+                                capture_output=True, text=True)
         file_list = sorted(
             [ansi_escape.sub("", line) for line in result.stdout.splitlines()]
         )
@@ -106,6 +107,7 @@ if __name__ == "__main__":
         logging.debug(f"DataFrame about to be sorted")
         dataframe = dataframe.sort_values(by="filename")
         logging.debug(f"DataFrame about to be saved")
-        dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
+        dataframe.to_csv(os.path.join(
+            original_path, "counts.csv"), index=False)
     except Exception as e:
         logging.error(f"Error in creating counts.csv with error {e}")
