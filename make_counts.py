@@ -1,7 +1,7 @@
 """
 Module: make_counts.py
 Description:
-    This module processes video files in a specified directory by counting their frames. 
+    This module processes video files in a specified directory by counting their frames.
     The frame counts, along with the corresponding filenames, are saved in a CSV file ('counts.csv').
     Video processing is handled by OpenCV, and the module leverages parallel processing through
     the concurrent.futures.ProcessPoolExecutor along with multiprocessing.Manager to safely share data
@@ -37,26 +37,37 @@ Notes:
     - The entry point includes a call to freeze_support() to support running frozen executables.
     - Logging is set up to provide informative messages, with optional debug logging available.
 """
-
-import pandas as pd
-import os
-import logging
 import argparse
-import cv2
 import concurrent.futures
+import logging
+import os
 import re
 import subprocess
-from multiprocessing import Manager, freeze_support, Lock
+from multiprocessing import freeze_support
+from multiprocessing import Lock
+from multiprocessing import Manager
+
+import cv2
+import pandas as pd
 
 
-def count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list, lock) -> int:
+def count_frames_and_write_new_file(original_path: str, file: str,
+                                    dataframe_list: list, lock) -> int:
+    """
+
+    :param original_path: str:
+    :param file: str:
+    :param dataframe_list: list:
+    :param lock:
+
+    """
     path = os.path.join(original_path, file)
     logging.info(f"Capture to video {file} about to be established")
     cap = cv2.VideoCapture(path)
-    
+
     try:
         logging.debug(f"Capture to video {file} established")
-        count = 0 
+        count = 0
         while cap.isOpened():
             ret, _ = cap.read()
             if count % 10000 == 0 and count != 0:
@@ -64,7 +75,7 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
             if not ret:
                 break
             count += 1
-            
+
         logging.info(f"Adding {file} to DataFrame list")
         with lock:
             logging.info(f"Lock acquired to file {file}")
@@ -79,7 +90,6 @@ def count_frames_and_write_new_file(original_path: str, file: str, dataframe_lis
 
 if __name__ == "__main__":
     freeze_support()
-    
 
     parser = argparse.ArgumentParser(description="Create counts.csv file")
 
@@ -89,34 +99,36 @@ if __name__ == "__main__":
         help="Path to the directory containing the video files",
         default=".",
     )
-    parser.add_argument(
-        "--max-workers", type=int, help="Number of processes to use", default=20
-    )
-    parser.add_argument(
-        "--debug", action="store_true", help="Enable debug logging", default=False
-    )
+    parser.add_argument("--max-workers",
+                        type=int,
+                        help="Number of processes to use",
+                        default=20)
+    parser.add_argument("--debug",
+                        action="store_true",
+                        help="Enable debug logging",
+                        default=False)
     args = parser.parse_args()
 
     logging.basicConfig(
         format="%(asctime)s: %(message)s",
         level=logging.INFO,
         datefmt="%Y-%m-%d %H:%M:%S",
-    )    
+    )
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
         logging.debug(f"Debug logging enabled")
-    
 
-    
     original_path = os.path.join(os.getcwd(), args.path)
-    
+
     try:
         command = "ls | grep -E '.mp4$|.h264$'"
         ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        result = subprocess.run(command,
+                                shell=True,
+                                capture_output=True,
+                                text=True)
         file_list = sorted(
-            [ansi_escape.sub("", line) for line in result.stdout.splitlines()]
-        )
+            [ansi_escape.sub("", line) for line in result.stdout.splitlines()])
         logging.debug(f"File List: {file_list}")
     except Exception as e:
         logging.error(f"Error in getting file list with error {e}")
@@ -131,22 +143,26 @@ if __name__ == "__main__":
             logging.info(f"File List: {file_list}")
 
             with concurrent.futures.ProcessPoolExecutor(
-                max_workers=args.max_workers
-            ) as executor:
+                    max_workers=args.max_workers) as executor:
                 logging.debug(f"Executor established")
                 futures = [
-                    executor.submit(count_frames_and_write_new_file, original_path, file, dataframe_list, lock)
-                    for file in file_list
+                    executor.submit(
+                        count_frames_and_write_new_file,
+                        original_path,
+                        file,
+                        dataframe_list,
+                        lock,
+                    ) for file in file_list
                 ]
                 concurrent.futures.wait(futures)
                 logging.debug(f"Executor mapped")
 
-            dataframe = pd.DataFrame(
-                list(dataframe_list), columns=["filename", "framecount"]
-            )
+            dataframe = pd.DataFrame(list(dataframe_list),
+                                     columns=["filename", "framecount"])
             logging.debug(f"DataFrame about to be sorted")
             dataframe = dataframe.sort_values(by="filename")
             logging.debug(f"DataFrame about to be saved")
-            dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
+            dataframe.to_csv(os.path.join(original_path, "counts.csv"),
+                             index=False)
     except Exception as e:
         logging.error(f"Error in creating counts.csv with error {e}")

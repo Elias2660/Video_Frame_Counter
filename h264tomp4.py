@@ -1,24 +1,24 @@
 """
 Module: h264tomp4.py
- 
-This module processes video files in the .h264 format, converting them to .mp4 while counting the number 
-of frames in each video. The processed data (new filename and frame count) is stored in a CSV file. Additionally, 
+
+This module processes video files in the .h264 format, converting them to .mp4 while counting the number
+of frames in each video. The processed data (new filename and frame count) is stored in a CSV file. Additionally,
 the module moves the original .h264 files to a specified directory after processing.
 
-The module leverages OpenCV for video capture and writing, concurrent.futures for parallel processing, and 
-multiprocessing for sharing data safely between processes. It also provides command-line arguments to specify 
+The module leverages OpenCV for video capture and writing, concurrent.futures for parallel processing, and
+multiprocessing for sharing data safely between processes. It also provides command-line arguments to specify
 the path to video files, the number of parallel workers, and the logging level.
 
 Functions:
     count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list, lock) -> int:
-        Processes a video file by reading its frames, converting it to .mp4 if needed, counting the frames, 
+        Processes a video file by reading its frames, converting it to .mp4 if needed, counting the frames,
         and appending the results to a shared list. Logging statements provide feedback during processing.
-        
+
 Usage:
     To run the module:
         python h264tomp4.py --path [directory_path] --max-workers [num_workers] [--debug]
 
-Processes a given video file by reading its frames, optionally converting it from .h264 to .mp4, 
+Processes a given video file by reading its frames, optionally converting it from .h264 to .mp4,
 counting the number of frames, and appending the processed filename and frame count to a shared list.
 
     Parameters:
@@ -28,7 +28,7 @@ counting the number of frames, and appending the processed filename and frame co
         lock (Lock): A multiprocessing lock to ensure thread-safe updates to the shared dataframe_list.
 
     Returns:
-        int: The total number of frames read from the video file. 
+        int: The total number of frames read from the video file.
              (Note: The function may not explicitly return a value in case of an exception.)
 
     Notes:
@@ -37,26 +37,33 @@ counting the number of frames, and appending the processed filename and frame co
         - OpenCV's VideoCapture is used to read frames, and VideoWriter is used to write frames to the new file.
         - The function periodically logs progress (every 10,000 frames) for both reading and writing.
         - After processing, the original capture and video writer objects are properly released.
-        - Any exceptions encountered during processing are logged, and the function safely releases 
+        - Any exceptions encountered during processing are logged, and the function safely releases
           any allocated resources.
     """
-
-
-import pandas as pd
-
-import os
-import logging
 import argparse
-import cv2
 import concurrent.futures
+import logging
+import os
 import re
 import subprocess
-from multiprocessing import Manager, freeze_support, Lock
+from multiprocessing import freeze_support
+from multiprocessing import Lock
+from multiprocessing import Manager
+
+import cv2
+import pandas as pd
 
 
-def count_frames_and_write_new_file(
-    original_path: str, file: str, dataframe_list: list, lock
-) -> int:
+def count_frames_and_write_new_file(original_path: str, file: str,
+                                    dataframe_list: list, lock) -> int:
+    """
+
+    :param original_path: str:
+    :param file: str:
+    :param dataframe_list: list:
+    :param lock:
+
+    """
     path = os.path.join(original_path, file)
     logging.info(f"Capture to video {file} about to be established")
     cap = cv2.VideoCapture(path)
@@ -69,9 +76,8 @@ def count_frames_and_write_new_file(
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
-        out = cv2.VideoWriter(
-            new_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (frame_width, frame_height)
-        )
+        out = cv2.VideoWriter(new_path, cv2.VideoWriter_fourcc(*"mp4v"), fps,
+                              (frame_width, frame_height))
 
     try:
         logging.debug(f"Capture to video {file} established")
@@ -119,12 +125,14 @@ if __name__ == "__main__":
         help="Path to the directory containing the video files",
         default=".",
     )
-    parser.add_argument(
-        "--max-workers", type=int, help="Number of processes to use", default=20
-    )
-    parser.add_argument(
-        "--debug", action="store_true", help="Enable debug logging", default=False
-    )
+    parser.add_argument("--max-workers",
+                        type=int,
+                        help="Number of processes to use",
+                        default=20)
+    parser.add_argument("--debug",
+                        action="store_true",
+                        help="Enable debug logging",
+                        default=False)
     args = parser.parse_args()
     original_path = os.path.join(os.getcwd(), args.path)
 
@@ -132,14 +140,16 @@ if __name__ == "__main__":
         logging.getLogger().setLevel(logging.DEBUG)
 
     # weird stuff for regarding multiprocessing
-    freeze_support() 
+    freeze_support()
     try:
         command = "ls | grep -E '.h264$'"
         ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        result = subprocess.run(command,
+                                shell=True,
+                                capture_output=True,
+                                text=True)
         file_list = sorted(
-            [ansi_escape.sub("", line) for line in result.stdout.splitlines()]
-        )
+            [ansi_escape.sub("", line) for line in result.stdout.splitlines()])
         logging.debug(f"File List: {file_list}")
     except Exception as e:
         logging.error(f"Error in getting file list with error {e}")
@@ -152,8 +162,7 @@ if __name__ == "__main__":
             logging.info(f"File List: {file_list}")
 
             with concurrent.futures.ProcessPoolExecutor(
-                max_workers=args.max_workers
-            ) as executor:
+                    max_workers=args.max_workers) as executor:
                 logging.debug(f"Executor established")
                 futures = [
                     executor.submit(
@@ -162,19 +171,18 @@ if __name__ == "__main__":
                         file,
                         dataframe_list,
                         lock,
-                    )
-                    for file in file_list
+                    ) for file in file_list
                 ]
                 concurrent.futures.wait(futures)
                 logging.debug(f"Executor mapped")
 
-            dataframe = pd.DataFrame(
-                list(dataframe_list), columns=["filename", "framecount"]
-            )
+            dataframe = pd.DataFrame(list(dataframe_list),
+                                     columns=["filename", "framecount"])
             logging.debug(f"DataFrame about to be sorted")
             dataframe = dataframe.sort_values(by="filename")
             logging.debug(f"DataFrame about to be saved")
-            dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
+            dataframe.to_csv(os.path.join(original_path, "counts.csv"),
+                             index=False)
 
             # keep the .h264 and the .mp4 files separate
             logging.info(f"Moving the files to new directory")
