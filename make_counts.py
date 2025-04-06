@@ -49,7 +49,9 @@ import subprocess
 from multiprocessing import Manager, freeze_support, Lock
 
 
-def count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list, lock) -> int:
+def count_frames_and_write_new_file(
+    original_path: str, file: str, dataframe_list: list, lock
+) -> int:
     path = os.path.join(original_path, file)
     logging.info(f"Capture to video {file} about to be established")
     cap = cv2.VideoCapture(path)
@@ -110,8 +112,7 @@ if __name__ == "__main__":
     try:
         command = "ls | grep -E '.mp4$|.h264$'"
         ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-        result = subprocess.run(command, shell=True,
-                                capture_output=True, text=True)
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
         file_list = sorted(
             [ansi_escape.sub("", line) for line in result.stdout.splitlines()]
         )
@@ -133,8 +134,13 @@ if __name__ == "__main__":
             ) as executor:
                 logging.debug(f"Executor established")
                 futures = [
-                    executor.submit(count_frames_and_write_new_file,
-                                    original_path, file, dataframe_list, lock)
+                    executor.submit(
+                        count_frames_and_write_new_file,
+                        original_path,
+                        file,
+                        dataframe_list,
+                        lock,
+                    )
                     for file in file_list
                 ]
                 concurrent.futures.wait(futures)
@@ -146,7 +152,6 @@ if __name__ == "__main__":
             logging.debug(f"DataFrame about to be sorted")
             dataframe = dataframe.sort_values(by="filename")
             logging.debug(f"DataFrame about to be saved")
-            dataframe.to_csv(os.path.join(
-                original_path, "counts.csv"), index=False)
+            dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
     except Exception as e:
         logging.error(f"Error in creating counts.csv with error {e}")

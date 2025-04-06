@@ -41,7 +41,6 @@ counting the number of frames, and appending the processed filename and frame co
           any allocated resources.
     """
 
-
 import pandas as pd
 
 import os
@@ -70,8 +69,7 @@ def count_frames_and_write_new_file(
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
         out = cv2.VideoWriter(
-            new_path, cv2.VideoWriter_fourcc(
-                *"mp4v"), fps, (frame_width, frame_height)
+            new_path, cv2.VideoWriter_fourcc(*"mp4v"), fps, (frame_width, frame_height)
         )
 
     try:
@@ -137,8 +135,7 @@ if __name__ == "__main__":
     try:
         command = "ls | grep -E '.h264$'"
         ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-        result = subprocess.run(command, shell=True,
-                                capture_output=True, text=True)
+        result = subprocess.run(command, shell=True, capture_output=True, text=True)
         file_list = sorted(
             [ansi_escape.sub("", line) for line in result.stdout.splitlines()]
         )
@@ -176,8 +173,7 @@ if __name__ == "__main__":
             logging.debug(f"DataFrame about to be sorted")
             dataframe = dataframe.sort_values(by="filename")
             logging.debug(f"DataFrame about to be saved")
-            dataframe.to_csv(os.path.join(
-                original_path, "counts.csv"), index=False)
+            dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
 
             # keep the .h264 and the .mp4 files separate
             logging.info(f"Moving the files to new directory")
