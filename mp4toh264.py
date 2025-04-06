@@ -13,6 +13,14 @@ import pandas as pd
 def count_frames_and_write_new_file(
     original_path: str, file: str, dataframe_list: list, lock
 ) -> int:
+    """
+
+    :param original_path: str: 
+    :param file: str: 
+    :param dataframe_list: list: 
+    :param lock: 
+
+    """
     path = os.path.join(original_path, file)
     logging.info(f"Capture to Path {file} about to be established")
     cap = cv2.VideoCapture(path)
