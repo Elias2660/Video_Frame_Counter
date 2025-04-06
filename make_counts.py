@@ -37,14 +37,15 @@ Notes:
     - The entry point includes a call to freeze_support() to support running frozen executables.
     - Logging is set up to provide informative messages, with optional debug logging available.
 """
-
 import argparse
 import concurrent.futures
 import logging
 import os
 import re
 import subprocess
-from multiprocessing import Lock, Manager, freeze_support
+from multiprocessing import freeze_support
+from multiprocessing import Lock
+from multiprocessing import Manager
 
 import cv2
 import pandas as pd
