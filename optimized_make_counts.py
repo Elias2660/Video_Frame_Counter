@@ -56,12 +56,14 @@ if __name__ == "__main__":
         help="Path to the directory containing the video files",
         default=".",
     )
-    parser.add_argument(
-        "--max-workers", type=int, help="Number of processes to use", default=20
-    )
-    parser.add_argument(
-        "--debug", action="store_true", help="Enable debug logging", default=False
-    )
+    parser.add_argument("--max-workers",
+                        type=int,
+                        help="Number of processes to use",
+                        default=20)
+    parser.add_argument("--debug",
+                        action="store_true",
+                        help="Enable debug logging",
+                        default=False)
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -78,10 +80,12 @@ if __name__ == "__main__":
     try:
         command = "ls | grep -E '.mp4$|.h264$'"
         ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
+        result = subprocess.run(command,
+                                shell=True,
+                                capture_output=True,
+                                text=True)
         file_list = sorted(
-            [ansi_escape.sub("", line) for line in result.stdout.splitlines()]
-        )
+            [ansi_escape.sub("", line) for line in result.stdout.splitlines()])
         logging.debug(f"File List: {file_list}")
     except Exception as e:
         logging.error(f"Error in getting file list with error {e}")
@@ -99,13 +103,13 @@ if __name__ == "__main__":
             dataframe_list.append([file, count])
             cap.release()
 
-        dataframe = pd.DataFrame(
-            list(dataframe_list), columns=["filename", "framecount"]
-        )
+        dataframe = pd.DataFrame(list(dataframe_list),
+                                 columns=["filename", "framecount"])
 
         logging.debug(f"DataFrame about to be sorted")
         dataframe = dataframe.sort_values(by="filename")
         logging.debug(f"DataFrame about to be saved")
-        dataframe.to_csv(os.path.join(original_path, "counts.csv"), index=False)
+        dataframe.to_csv(os.path.join(original_path, "counts.csv"),
+                         index=False)
     except Exception as e:
         logging.error(f"Error in creating counts.csv with error {e}")
