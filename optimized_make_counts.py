@@ -51,10 +51,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create counts.csv file")
 
     parser.add_argument(
-        "--path",
+        "--video-filepath",
         type=str,
         help="Path to the directory containing the video files",
         default=".",
+    )
+    parser.add_argument(
+        "--output-filepath",
+        type=str,
+        help="Where the counts.csv file is going to be written to",
+        default="."
     )
     parser.add_argument("--max-workers",
                         type=int,
@@ -75,7 +81,9 @@ if __name__ == "__main__":
         logging.getLogger().setLevel(logging.DEBUG)
         logging.debug(f"Debug logging enabled")
 
-    original_path = os.path.join(os.getcwd(), args.path)
+    # should work even if not a relative path
+    # original_path = os.path.join(os.getcwd(), args.video_filepath)
+    original_path = os.path.join(args.video_filepath)
 
     try:
         command = "ls | grep -E '.mp4$|.h264$'"

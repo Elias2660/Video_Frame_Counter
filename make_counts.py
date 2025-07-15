@@ -8,7 +8,7 @@ Description:
     between processes.
 Usage:
     The script is intended to be executed as a standalone program. Command-line arguments include:
-      --path       : Path to the directory containing the video files (default is the current directory).
+      --video-filepath       : Path to the directory containing the video files (default is the current directory).
       --max-workers: Number of worker processes to use for parallel processing (default is 20).
       --debug      : Enable debug level logging (optional).
     The script filters video files based on the extensions '.mp4' and '.h264', counts the frames for
@@ -108,10 +108,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create counts.csv file")
 
     parser.add_argument(
-        "--path",
+        "--video-filepath",
         type=str,
         help="Path to the directory containing the video files",
         default=".",
+    )
+    parser.add_argument(
+        "--output-filepath",
+        type=str,
+        help="Where the counts.csv file is going to be written to",
+        default="."
     )
     parser.add_argument("--max-workers",
                         type=int,
@@ -131,8 +137,11 @@ if __name__ == "__main__":
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
         logging.debug(f"Debug logging enabled")
+        
+    # should work even if not a relative path
+    # original_path = os.path.join(os.getcwd(), args.video_filepath)
+    original_path = os.path.join(args.video_filepath)
 
-    original_path = os.path.join(os.getcwd(), args.path)
 
     try:
         command = "ls | grep -E '.mp4$|.h264$'"
@@ -176,7 +185,7 @@ if __name__ == "__main__":
             logging.debug(f"DataFrame about to be sorted")
             dataframe = dataframe.sort_values(by="filename")
             logging.debug(f"DataFrame about to be saved")
-            dataframe.to_csv(os.path.join(original_path, "counts.csv"),
+            dataframe.to_csv(os.path.join(args.output_filepath, "counts.csv"),
                              index=False)
     except Exception as e:
         logging.error(f"Error in creating counts.csv with error {e}")
