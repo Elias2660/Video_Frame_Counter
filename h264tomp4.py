@@ -54,29 +54,13 @@ import cv2
 import pandas as pd
 
 
-def count_frames_and_write_new_file(original_path: str, file: str,
+def count_frames_and_write_new_file(original_path: str,output_path: str, file: str,
                                     dataframe_list: list, lock) -> int:
     """
-
     :param original_path: str:
     :param file: str:
     :param dataframe_list: list:
-    :param lock: param original_path: str:
-    :param file: str:
-    :param dataframe_list: list:
-    :param original_path: str:
-    :param file: str:
-    :param dataframe_list: list:
-    :param original_path: str:
-    :param file: str:
-    :param dataframe_list: list:
-    :param original_path: str:
-    :param file: str:
-    :param dataframe_list: list:
-    :param original_path: str:
-    :param file: str:
-    :param dataframe_list: list:
-
+    :param lock: param 
     """
     path = os.path.join(original_path, file)
     logging.info(f"Capture to video {file} about to be established")
@@ -85,7 +69,7 @@ def count_frames_and_write_new_file(original_path: str, file: str,
     new_path, frame_width, frame_height, fps = None, None, None, None
     # also convert to .mp4
     if path.endswith(".h264"):
-        new_path = path.replace(".h264", ".mp4")
+        new_path = os.path.join(output_path, file.replace(".h264", ".mp4"))
         logging.info(f"Capture to video {new_path} about to be established")
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -134,7 +118,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create counts.csv file")
 
     parser.add_argument(
-        "--video_filepath",
+        "--video-filepath",
         type=str,
         help="Path to the directory containing the video files",
         default=".",
@@ -192,6 +176,7 @@ if __name__ == "__main__":
                     executor.submit(
                         count_frames_and_write_new_file,
                         original_path,
+                        args.output_filepath,
                         file,
                         dataframe_list,
                         lock,
@@ -205,14 +190,8 @@ if __name__ == "__main__":
             logging.debug(f"DataFrame about to be sorted")
             dataframe = dataframe.sort_values(by="filename")
             logging.debug(f"DataFrame about to be saved")
-            dataframe.to_csv(os.path.join(original_path, "counts.csv"),
+            dataframe.to_csv(os.path.join(args.output_file_path, "counts.csv"),
                              index=False)
-
-            # keep the .h264 and the .mp4 files separate
-            logging.info(f"Moving the files to new directory")
-            subprocess.run("rm -rf h264_files", shell=True)
-            subprocess.run("mkdir -p h264_files", shell=True)
-            subprocess.run("mv *.h264 h264_files/", shell=True)
 
     except Exception as e:
         logging.error(f"Error in creating counts.csv with error {e}")
