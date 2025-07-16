@@ -82,8 +82,8 @@ if __name__ == "__main__":
         logging.debug(f"Debug logging enabled")
 
     # should work even if not a relative path
-    # original_path = os.path.join(os.getcwd(), args.video_filepath)
-    original_path = os.path.join(args.video_filepath)
+    original_path = os.path.join(os.getcwd(), args.video_filepath)
+    # original_path = os.path.join(args.video_filepath)
 
     try:
         command = "ls | grep -E '.mp4$|.h264$'"

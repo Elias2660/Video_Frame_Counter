@@ -140,8 +140,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     # should work even if not a relative path
-    # original_path = os.path.join(os.getcwd(), args.video_filepath)
-    original_path = os.path.join(args.video_filepath)
+    original_path = os.path.join(os.getcwd(), args.video_filepath)
+    # original_path = os.path.join(args.video_filepath)
 
 
     if args.debug:
