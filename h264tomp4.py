@@ -156,8 +156,7 @@ if __name__ == "__main__":
                                 shell=True,
                                 capture_output=True,
                                 text=True)
-        file_list = sorted(
-            [ansi_escape.sub("", line) for line in result.stdout.splitlines()])
+        file_list = [file for file in os.listdir(args.video_filepath) if file.endswith(".h264") or file.endswith(".mp4")]
         logging.debug(f"File List: {file_list}")
     except Exception as e:
         logging.error(f"Error in getting file list with error {e}")
