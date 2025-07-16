@@ -1,43 +1,42 @@
 """
-Script for counting video frames in media files and generating a CSV report.
+Module Name: optimized_make_counts.py
 
-This script searches for video files with extensions .mp4 and .h264 in the specified
-directory, counts the total number of frames for each video using OpenCV, and writes
-the results into a CSV file named "counts.csv". Logging is provided for both normal
-and debug modes to help trace execution flow and potential issues.
+Description:
+    Efficiently counts frames in .mp4 and .h264 video files by reading OpenCV’s CAP_PROP_FRAME_COUNT
+    property instead of decoding each frame. Scans the target directory, collects filename/framecount pairs,
+    and writes them to 'counts.csv'.
 
 Usage:
-    python optimized_make_counts.py [--path PATH] [--max-workers MAX_WORKERS] [--debug]
+    python optimized_make_counts.py \
+        --video-filepath <directory> \
+        --output-filepath <directory> \
+        [--max-workers <num>] \
+        [--debug]
 
 Arguments:
-    --path:
-        Type: str
-        Description: Path to the directory containing the video files.
-        Default: "." (current working directory)
-
-    ! no use, just for compatibility for the master_run.py
-    --max-workers:
-        Type: int
-        Description: Number of processes to use (reserved for potential parallelizations).
-        Default: 20
-
-    --debug:
-        Action: store_true
-        Description: Enable debug logging to provide detailed output.
-        Default: False
+    --video-filepath    Directory containing video files (.mp4, .h264). (default: ".")
+    --output-filepath   Directory where 'counts.csv' will be written. (default: ".")
+    --max-workers       Reserved for compatibility (not used). (default: 20)
+    --debug             Enable DEBUG-level logging. (default: False)
 
 Workflow:
-    1. Parse command-line parameters.
-    2. Configure logging based on debug flag.
-    3. Construct the full path to the directory with video files.
-    4. Execute a shell command to list files filtered for .mp4 and .h264 formats.
-    5. Iterate through each file:
-         - Open the video using OpenCV.
-         - Retrieve the total frame count.
-         - Append the filename and frame count to a data collection list.
-    6. Create a pandas DataFrame from the collected data.
-    7. Sort the DataFrame by filename and save it as "counts.csv" in the same directory.
+    1. Parse command-line arguments and set up logging.
+    2. Resolve full path to `--video-filepath`.
+    3. List all files ending in '.mp4' or '.h264'.
+    4. For each video:
+         - Open with cv2.VideoCapture.
+         - Retrieve total frame count via `cap.get(cv2.CAP_PROP_FRAME_COUNT)`.
+         - Release the capture.
+         - Append [filename, count] to a data list.
+    5. Build a pandas DataFrame from collected data, sort by filename, and save as 'counts.csv'.
+    6. Log progress and any errors encountered.
+
+Dependencies:
+    - OpenCV (cv2)
+    - pandas
+    - argparse, logging, os
 """
+
 import argparse
 import logging
 import os

@@ -1,45 +1,43 @@
 """
-Module: h264tomp4.py
+Module Name: h264tomp4.py
 
-This module processes video files in the .h264 format, converting them to .mp4 while counting the number
-of frames in each video. The processed data (new filename and frame count) is stored in a CSV file. Additionally,
-the module moves the original .h264 files to a specified directory after processing.
-
-The module leverages OpenCV for video capture and writing, concurrent.futures for parallel processing, and
-multiprocessing for sharing data safely between processes. It also provides command-line arguments to specify
-the path to video files, the number of parallel workers, and the logging level.
-
-Functions:
-    count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list, lock) -> int:
-        Processes a video file by reading its frames, converting it to .mp4 if needed, counting the frames,
-        and appending the results to a shared list. Logging statements provide feedback during processing.
+Description:
+    Counts frames in video files and converts “.h264” inputs to “.mp4” outputs in parallel.
+    - Reads every .h264 or .mp4 in the specified directory.
+    - If a file ends with “.h264”, opens it, counts frames, and writes a new “.mp4” copy.
+    - Records each output filename and its frame count into a shared list.
+    - After processing, writes “counts.csv” mapping converted filenames to their frame counts.
 
 Usage:
-    To run the module:
-        python h264tomp4.py --path [directory_path] --max-workers [num_workers] [--debug]
+    python h264tomp4.py \
+        --video-filepath <input_directory> \
+        --output-filepath <output_directory> \
+        [--max-workers <num_processes>] \
+        [--debug]
 
-Processes a given video file by reading its frames, optionally converting it from .h264 to .mp4,
-counting the number of frames, and appending the processed filename and frame count to a shared list.
+Arguments:
+    --video-filepath    Directory containing .h264/.mp4 files to process (default: “.”)
+    --output-filepath   Directory where converted .mp4 and counts.csv are saved (default: “.”)
+    --max-workers       Number of parallel worker processes (default: 20)
+    --debug             Enable DEBUG‑level logging (default: False)
 
-    Parameters:
-        original_path (str): The base directory path containing the video file.
-        file (str): The name of the video file to be processed.
-        dataframe_list (list): A list shared among processes to store the output as [filename, framecount].
-        lock (Lock): A multiprocessing lock to ensure thread-safe updates to the shared dataframe_list.
+Workflow:
+    1. Discover all .h264 and .mp4 files under --video-filepath.
+    2. Using ProcessPoolExecutor with --max-workers:
+         - For each file, open with cv2.VideoCapture.
+         - If .h264, initialize VideoWriter for new .mp4 in --output-filepath.
+         - Read frames in a loop, count them, and write to .mp4 if applicable.
+         - Append [converted_filename, framecount] to a Manager list under a lock.
+    3. After all tasks finish, assemble the shared list into a pandas DataFrame,
+       sort by filename, and save as “counts.csv” in --output-filepath.
+    4. Log progress every 10,000 frames and on errors.
 
-    Returns:
-        int: The total number of frames read from the video file.
-             (Note: The function may not explicitly return a value in case of an exception.)
-
-    Notes:
-        - If the video file has a ".h264" extension, the function creates a new file with a ".mp4"
-          extension and writes the converted video frames into it.
-        - OpenCV's VideoCapture is used to read frames, and VideoWriter is used to write frames to the new file.
-        - The function periodically logs progress (every 10,000 frames) for both reading and writing.
-        - After processing, the original capture and video writer objects are properly released.
-        - Any exceptions encountered during processing are logged, and the function safely releases
-          any allocated resources.
-    """
+Dependencies:
+    - OpenCV (cv2)
+    - pandas
+    - argparse, logging, os, re, subprocess
+    - concurrent.futures, multiprocessing (Manager, freeze_support, Lock)
+"""
 import argparse
 import concurrent.futures
 import logging

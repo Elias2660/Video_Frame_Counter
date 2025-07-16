@@ -1,42 +1,45 @@
 """
-Module: make_counts.py
+Module Name: make_counts.py
+
 Description:
-    This module processes video files in a specified directory by counting their frames.
-    The frame counts, along with the corresponding filenames, are saved in a CSV file ('counts.csv').
-    Video processing is handled by OpenCV, and the module leverages parallel processing through
-    the concurrent.futures.ProcessPoolExecutor along with multiprocessing.Manager to safely share data
-    between processes.
+    Counts frames in all .mp4 and .h264 videos under a given directory in parallel,
+    and writes out a CSV file ('counts.csv') listing each filename and its frame count.
+    Utilizes OpenCV for video access and multiprocessing to speed up per-file processing.
+
 Usage:
-    The script is intended to be executed as a standalone program. Command-line arguments include:
-      --video-filepath       : Path to the directory containing the video files (default is the current directory).
-      --max-workers: Number of worker processes to use for parallel processing (default is 20).
-      --debug      : Enable debug level logging (optional).
-    The script filters video files based on the extensions '.mp4' and '.h264', counts the frames for
-    each video, and outputs a CSV file with columns "filename" and "framecount".
-Functions:
-    count_frames_and_write_new_file(original_path: str, file: str, dataframe_list: list, lock) -> int:
-        Processes a single video file by performing the following:
-          - Constructs the video file path.
-          - Opens the video file using OpenCV's VideoCapture.
-          - Iterates through the video frame by frame to count the total number of frames.
-          - Logs progress periodically (every 10,000 frames).
-          - Safely appends the filename and its corresponding frame count into a shared list using a lock.
-          - Releases the video capture resource after processing.
-        Parameters:
-          original_path (str): The directory path where the video file is located.
-          file (str): The filename of the video to be processed.
-          dataframe_list (list): A shared list for collecting the [filename, framecount] pairs.
-          lock: A multiprocessing lock to ensure that appending to the shared list is thread-safe.
-        Returns:
-          int: The number of frames counted in the video (the result is indirectly used by appending to the shared list).
-        Exceptions:
-          - Logs an error message if any exceptions occur during the frame counting process, ensuring proper cleanup.
-Notes:
-    - The script uses a UNIX command via subprocess (i.e., 'ls' and 'grep') to filter video files,
-      so it may be platform specific.
-    - The entry point includes a call to freeze_support() to support running frozen executables.
-    - Logging is set up to provide informative messages, with optional debug logging available.
+    python make_counts.py \
+        --video-filepath <video_directory> \
+        --output-filepath <output_directory> \
+        [--max-workers <num_processes>] \
+        [--debug]
+
+Arguments:
+    --video-filepath    Directory containing the video files to process (default: '.')
+    --output-filepath   Directory where 'counts.csv' will be written (default: '.')
+    --max-workers       Number of parallel worker processes to use (default: 20)
+    --debug             Enable DEBUG‑level logging for detailed output
+
+Workflow:
+    1. Gather all files ending in .mp4 or .h264 in --video-filepath.
+    2. Spawn a ProcessPoolExecutor with --max-workers processes.
+    3. For each video, call count_frames_and_write_new_file():
+         - Open the video with OpenCV VideoCapture.
+         - Read frames in a loop, incrementing a counter and logging every 10,000 frames.
+         - Append [filename, framecount] to a shared list under a lock.
+    4. After all tasks complete, collect the shared list into a pandas DataFrame,
+       sort by filename, and save as 'counts.csv' in --output-filepath.
+    5. Log progress and any errors encountered.
+
+Dependencies:
+    - OpenCV (cv2)
+    - pandas
+    - argparse
+    - concurrent.futures
+    - multiprocessing (Manager, freeze_support, Lock)
+    - logging
+    - os, re, subprocess
 """
+
 import argparse
 import concurrent.futures
 import logging
