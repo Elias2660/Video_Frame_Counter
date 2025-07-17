@@ -187,7 +187,7 @@ if __name__ == "__main__":
             logging.debug(f"DataFrame about to be sorted")
             dataframe = dataframe.sort_values(by="filename")
             logging.debug(f"DataFrame about to be saved")
-            dataframe.to_csv(os.path.join(args.output_file_path, "counts.csv"),
+            dataframe.to_csv(os.path.join(args.output_filepath, "counts.csv"),
                              index=False)
 
     except Exception as e:
