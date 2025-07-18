@@ -81,27 +81,27 @@ def count_frames_and_write_new_file(original_path: str,output_path: str, file: s
         while cap.isOpened():
             ret, frame = cap.read()
             if count % 10000 == 0 and count != 0:
-                logging.info(f"Frame {count} read from {file}")
+                logging.debug(f"Frame {count} read from {file}")
             if not ret:
                 break
             if new_path:
                 out.write(frame)
                 if count % 10000 == 0 and count != 0:
-                    logging.info(
+                    logging.debug(
                         f"Frame {count} written to {file.replace('.h264', '.mp4')}"
                     )
             count += 1
 
-        logging.info(f"Adding {file} to DataFrame list")
+        logging.debug(f"Adding {file} to DataFrame list")
         with lock:
-            logging.info(f"Lock acquired to file {file}")
+            logging.debug(f"Lock acquired to file {file}")
             dataframe_list.append([file.replace(".h264", ".mp4"), count])
-        logging.info(f"Lock released and added {file} to DataFrame list")
+        logging.debug(f"Lock released and added {file} to DataFrame list")
         cap.release()
-        logging.info(f"Capture to video {file} released")
+        logging.debug(f"Capture to video {file} released")
         if new_path:
             out.release()
-            logging.info(f"Capture to video {file} released")
+            logging.debug(f"Capture to video {file} released")
     except Exception as e:
         logging.error(f"Error in counting frames for {file} with error {e}")
         cap.release()
@@ -148,12 +148,6 @@ if __name__ == "__main__":
     # weird stuff for regarding multiprocessing
     freeze_support()
     try:
-        command = "ls | grep -E '.h264$'"
-        ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
-        result = subprocess.run(command,
-                                shell=True,
-                                capture_output=True,
-                                text=True)
         file_list = [file for file in os.listdir(args.video_filepath) if file.endswith(".h264") or file.endswith(".mp4")]
         logging.debug(f"File List: {file_list}")
     except Exception as e:
