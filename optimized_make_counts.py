@@ -84,11 +84,11 @@ if __name__ == "__main__":
     original_path = os.path.join(os.getcwd(), args.video_filepath)
     # original_path = os.path.join(args.video_filepath)
 
-    try:
-        file_list = [file for file in os.listdir(args.video_filepath) if file.endswith(".h264") or file.endswith(".mp4")]
-        logging.debug(f"File List: {file_list}")
-    except Exception as e:
-        logging.error(f"Error in getting file list with error {e}")
+
+    file_list = [file for file in os.listdir(args.video_filepath) if file.endswith(".h264") or file.endswith(".mp4")]
+    if len(file_list) == 0:
+        raise Exception("No video files have been found. Either they have been deleted or the specified path is wrong.")
+
 
     try:
         dataframe_list = []
