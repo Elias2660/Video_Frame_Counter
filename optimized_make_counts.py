@@ -39,6 +39,11 @@ Dependencies:
 
 import argparse
 import logging
+logging.basicConfig(
+    format="%(asctime)s: (Frame Counter) %(message)s",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 import os
 
 import cv2
@@ -69,11 +74,6 @@ if __name__ == "__main__":
                         default=False)
     args = parser.parse_args()
 
-    logging.basicConfig(
-        format="%(asctime)s: %(message)s",
-        level=logging.INFO,
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
         logging.debug(f"Debug logging enabled")
@@ -90,8 +90,9 @@ if __name__ == "__main__":
 
     try:
         dataframe_list = []
-
-        logging.info(f"File List: {file_list}")
+        
+        logging.info(f"Attempting to create counts.csv file for {len(file_list)} videos")
+        # logging.info(f"File List: {file_list}")
 
         for file in file_list:
             # use .mp4 indexing function to find the frames without actually counting them

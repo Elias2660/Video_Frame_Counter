@@ -43,11 +43,14 @@ Dependencies:
 import argparse
 import concurrent.futures
 import logging
+logging.basicConfig(
+    format="%(asctime)s: (Frame Counter) %(message)s",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+
 import os
-import re
-import subprocess
 from multiprocessing import freeze_support
-from multiprocessing import Lock
 from multiprocessing import Manager
 
 import cv2
@@ -79,7 +82,7 @@ def count_frames_and_write_new_file(original_path: str, file: str,
 
     """
     path = os.path.join(original_path, file)
-    logging.info(f"Capture to video {file} about to be established")
+    logging.debug(f"Capture to video {file} about to be established")
     cap = cv2.VideoCapture(path)
 
     try:
@@ -97,9 +100,9 @@ def count_frames_and_write_new_file(original_path: str, file: str,
         with lock:
             logging.info(f"Lock acquired to file {file}")
             dataframe_list.append([file, count])
-        logging.info(f"Lock released and added {file} to DataFrame list")
+        logging.debug(f"Lock released and added {file} to DataFrame list")
         cap.release()
-        logging.info(f"Capture to video {file} released")
+        logging.info(f"Counted frames for {file}")
     except Exception as e:
         logging.error(f"Error in counting frames for {file} with error {e}")
         cap.release()
@@ -132,11 +135,6 @@ if __name__ == "__main__":
                         default=False)
     args = parser.parse_args()
 
-    logging.basicConfig(
-        format="%(asctime)s: %(message)s",
-        level=logging.INFO,
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
         logging.debug(f"Debug logging enabled")
@@ -161,7 +159,8 @@ if __name__ == "__main__":
             lock = manager.Lock()
             dataframe_list = manager.list()
 
-            logging.info(f"File List: {file_list}")
+            # logging.info(f"File List: {file_list}")
+            logging.info(f"Attempting to create counts.csv file for {len(file_list)} videos")
 
             with concurrent.futures.ProcessPoolExecutor(
                     max_workers=args.max_workers) as executor:
