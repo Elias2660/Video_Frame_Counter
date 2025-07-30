@@ -161,7 +161,7 @@ if __name__ == "__main__":
             dataframe_list = manager.list()
 
             # logging.info(f"File List: {file_list}")
-            logging.info(f"Attempting to convert {len(file_list)} from .h264 to .mp4")
+            logging.info(f"Attempting to convert {len(file_list)} videos from .h264 to .mp4")
 
             with concurrent.futures.ProcessPoolExecutor(
                     max_workers=args.max_workers) as executor:
