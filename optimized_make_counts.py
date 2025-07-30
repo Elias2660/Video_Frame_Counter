@@ -40,8 +40,6 @@ Dependencies:
 import argparse
 import logging
 import os
-import re
-import subprocess
 
 import cv2
 import pandas as pd
